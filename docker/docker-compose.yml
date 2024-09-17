@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/app/Dockerfile
+    container_name: ems_app
+    environment:
+      - SPRING_DATASOURCE_URL= jdbc:postgresql://postgres:5432/ems
+      - SPRING_DATASOURCE_USERNAME=ems_user
+      - SPRING_DATASOURCE_PASSWORD=ems_password
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - ems_network
+
+  postgres:
+    image: postgres:latest
+    container_name: ems_postgres
+    environment:
+     - POSTGRES_DB:ems
+     - POSTGRES_USER:ems_user
+     - PostGRES_PASSWORD:ems_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ems_network
+volumes:
+  postgres_data:
+
+networks:
+  ems_network:
+    driver: bridge
